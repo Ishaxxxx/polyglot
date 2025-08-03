@@ -22,33 +22,13 @@ const LanguageSwitcher = () => {
                 className="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
                 <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="it">Italiano</option>
-                <option value="pt">Português</option>
-                <option value="ru">Русский</option>
-                <option value="ja">日本語</option>
-                <option value="zh">中文</option>
-                <option value="ar">العربية</option>
-                <option value="hi">हिन्दी</option>
-                <option value="nl">Nederlands</option>
-                <option value="sv">Svenska</option>
-                <option value="ko">한국어</option>
-                <option value="tr">Türkçe</option>
-                <option value="pl">Polski</option>
-                <option value="cs">Čeština</option>
-                <option value="fi">Suomi</option>
-                <option value="el">Ελληνικά</option>
-                <option value="he">עברית</option>
-                <option value="hu">Magyar</option>
-                <option value="uk">Українська</option>
-                <option value="sk">Slovenčina</option>
-                <option value="id">Bahasa Indonesia</option>
-                <option value="fa">فارسی</option>
-                <option value="ga">Gaeilge</option>
-                <option value="az">Azərbaycan</option>
-                <option value="eo">Esperanto</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+                <option value="mr">मराठी (Marathi)</option>
+                <option value="es">Español (Spanish)</option>
+                <option value="fr">Français (French)</option>
+                <option value="ko">한국어 (Korean)</option>
+                <option value="zh">中文 (Chinese)</option>
+                <option value="sa">संस्कृत (Sanskrit)</option>
             </select>
         </div>
     );
