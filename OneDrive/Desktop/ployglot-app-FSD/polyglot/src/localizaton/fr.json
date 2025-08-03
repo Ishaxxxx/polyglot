@@ -1,0 +1,5 @@
+{
+  "welcome_message": "Bienvenue chez Polyglot !",
+  "app_introduction": "Ceci est une application simple pour démontrer les capacités multilingues à l'aide de React Hooks.",
+  "change_language_label": "Choisir la Langue:"
+}
