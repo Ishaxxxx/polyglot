@@ -1,0 +1,11 @@
+{
+    "welcome_message": "欢迎使用多语言翻译器",
+    "change_language_label": "更改语言:",
+    "enter_text_to_translate": "输入要翻译的文本",
+    "translate_button": "翻译",
+    "translation_result": "翻译结果:",
+    "select_target_language": "选择目标语言:",
+    "error_message": "翻译时出错。请重试。",
+    "loading": "正在翻译...",
+    "clear_text": "清除文本"
+}

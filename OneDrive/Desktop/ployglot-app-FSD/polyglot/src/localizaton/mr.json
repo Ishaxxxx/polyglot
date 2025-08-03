@@ -1,0 +1,11 @@
+{
+    "welcome_message": "बहुभाषिक अनुवादकात आपले स्वागत आहे",
+    "change_language_label": "भाषा बदला:",
+    "enter_text_to_translate": "भाषांतरासाठी मजकूर प्रविष्ट करा",
+    "translate_button": "भाषांतर करा",
+    "translation_result": "भाषांतर परिणाम:",
+    "select_target_language": "लक्ष्य भाषा निवडा:",
+    "error_message": "भाषांतरात त्रुटी झाली. कृपया पुन्हा प्रयत्न करा.",
+    "loading": "भाषांतर होत आहे...",
+    "clear_text": "मजकूर साफ करा"
+}

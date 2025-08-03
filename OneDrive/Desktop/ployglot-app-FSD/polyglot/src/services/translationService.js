@@ -13,34 +13,35 @@ const FALLBACK_APIS = [
 
 // Language code mapping - LibreTranslate supported languages only
 const LANGUAGE_CODES = {
-    en: 'en',    // English
-    ar: 'ar',    // Arabic
-    az: 'az',    // Azerbaijani
-    zh: 'zh',    // Chinese
-    cs: 'cs',    // Czech
-    nl: 'nl',    // Dutch
-    eo: 'eo',    // Esperanto
-    fi: 'fi',    // Finnish
-    fr: 'fr',    // French
-    de: 'de',    // German
-    el: 'el',    // Greek
-    he: 'he',    // Hebrew
-    hi: 'hi',    // Hindi
-    hu: 'hu',    // Hungarian
-    id: 'id',    // Indonesian
-    ga: 'ga',    // Irish
-    it: 'it',    // Italian
-    ja: 'ja',    // Japanese
-    ko: 'ko',    // Korean
-    fa: 'fa',    // Persian
-    pl: 'pl',    // Polish
-    pt: 'pt',    // Portuguese
-    ru: 'ru',    // Russian
-    sk: 'sk',    // Slovak
-    es: 'es',    // Spanish
-    sv: 'sv',    // Swedish
-    tr: 'tr',    // Turkish
-    uk: 'uk'     // Ukrainian
+    en: 'en',         // English
+    hi: 'hi',         // Hindi
+    es: 'es',         // Spanish
+    fr: 'fr',         // French
+    ko: 'ko',         // Korean
+    'zh-Hans': 'zh-Hans', // Chinese Simplified
+    'zh-Hant': 'zh-Hant', // Chinese Traditional
+    ar: 'ar',         // Arabic
+    az: 'az',         // Azerbaijani
+    cs: 'cs',         // Czech
+    nl: 'nl',         // Dutch
+    eo: 'eo',         // Esperanto
+    fi: 'fi',         // Finnish
+    de: 'de',         // German
+    el: 'el',         // Greek
+    he: 'he',         // Hebrew
+    hu: 'hu',         // Hungarian
+    id: 'id',         // Indonesian
+    ga: 'ga',         // Irish
+    it: 'it',         // Italian
+    ja: 'ja',         // Japanese
+    fa: 'fa',         // Persian
+    pl: 'pl',         // Polish
+    pt: 'pt',         // Portuguese
+    ru: 'ru',         // Russian
+    sk: 'sk',         // Slovak
+    sv: 'sv',         // Swedish
+    tr: 'tr',         // Turkish
+    uk: 'uk'          // Ukrainian
 };
 
 // LibreTranslate API with fallback support

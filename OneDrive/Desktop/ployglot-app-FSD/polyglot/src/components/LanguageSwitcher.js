@@ -23,12 +23,10 @@ const LanguageSwitcher = () => {
             >
                 <option value="en">English</option>
                 <option value="hi">हिन्दी (Hindi)</option>
-                <option value="mr">मराठी (Marathi)</option>
                 <option value="es">Español (Spanish)</option>
                 <option value="fr">Français (French)</option>
                 <option value="ko">한국어 (Korean)</option>
-                <option value="zh">中文 (Chinese)</option>
-                <option value="sa">संस्कृत (Sanskrit)</option>
+                <option value="zh-Hans">中文 (Chinese Simplified)</option>
             </select>
         </div>
     );

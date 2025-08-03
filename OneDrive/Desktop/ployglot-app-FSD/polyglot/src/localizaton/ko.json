@@ -1,0 +1,11 @@
+{
+    "welcome_message": "다국어 번역기에 오신 것을 환영합니다",
+    "change_language_label": "언어 변경:",
+    "enter_text_to_translate": "번역할 텍스트를 입력하세요",
+    "translate_button": "번역",
+    "translation_result": "번역 결과:",
+    "select_target_language": "대상 언어 선택:",
+    "error_message": "번역 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    "loading": "번역 중...",
+    "clear_text": "텍스트 지우기"
+}

@@ -1,0 +1,11 @@
+{
+    "welcome_message": "बहुभाषी अनुवादके स्वागतम्",
+    "change_language_label": "भाषां परिवर्तयतु:",
+    "enter_text_to_translate": "अनुवादाय पाठं प्रविशतु",
+    "translate_button": "अनुवादयतु",
+    "translation_result": "अनुवाद परिणामः:",
+    "select_target_language": "लक्ष्य भाषां चिनुत:",
+    "error_message": "अनुवादे त्रुटिः जातः। पुनः प्रयतताम्।",
+    "loading": "अनुवादः क्रियते...",
+    "clear_text": "पाठं शुद्धयतु"
+}
