@@ -49,12 +49,6 @@ const jaTranslations = {
     "change_language_label": "言語を選択："
 };
 
-const zhTranslations = {
-    "welcome_message": "欢迎来到Polyglot！",
-    "app_introduction": "这是一个使用React Hooks演示多语言功能的简单应用程序。",
-    "change_language_label": "选择语言："
-};
-
 const arTranslations = {
     "welcome_message": "مرحباً بك في Polyglot!",
     "app_introduction": "هذا تطبيق بسيط لإظهار القدرات متعددة اللغات باستخدام React Hooks.",
@@ -80,26 +74,24 @@ const svTranslations = {
 };
 
 const koTranslations = {
-    "welcome_message": "Polyglot에 오신 것을 환영합니다!",
-    "app_introduction": "이것은 React Hooks를 사용하여 다국어 기능을 시연하는 간단한 애플리케이션입니다.",
-    "change_language_label": "언어 선택:"
+    "welcome_message": "🌍 Polyglot에 오신 것을 환영합니다!",
+    "app_introduction": "이것은 React Hooks와 AI 기술을 사용하여 음성 인식, 텍스트 음성 변환 및 고급 번역 기능을 시연하는 차세대 다국어 애플리케이션입니다.",
+    "change_language_label": "인터페이스 언어 선택:"
+};
+
+const zhTranslations = {
+    "welcome_message": "🌍 欢迎来到Polyglot！",
+    "app_introduction": "这是一个使用React Hooks和AI技术展示语音识别、文本转语音和高级翻译功能的下一代多语言应用程序。",
+    "change_language_label": "选择界面语言："
 };
 
 const translations = {
     en: enTranslations,
     es: esTranslations,
     fr: frTranslations,
-    de: deTranslations,
-    it: itTranslations,
-    pt: ptTranslations,
-    ru: ruTranslations,
-    ja: jaTranslations,
-    zh: zhTranslations,
-    ar: arTranslations,
     hi: hiTranslations,
-    nl: nlTranslations,
-    sv: svTranslations,
     ko: koTranslations,
+    'zh-Hans': zhTranslations
 };
 
 // 1. Create the context

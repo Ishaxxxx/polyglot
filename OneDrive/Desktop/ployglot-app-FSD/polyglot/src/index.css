@@ -9,9 +9,328 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Light Theme (default) */
+.light-theme {
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+/* Dark Theme */
+.dark-theme {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3,
+.dark-theme h4,
+.dark-theme h5,
+.dark-theme h6 {
+  color: #f9fafb;
+}
+
+/* Override Tailwind classes for dark theme */
+.dark-theme .bg-white {
+  background-color: #1f2937 !important;
+}
+
+.dark-theme .bg-gray-50 {
+  background-color: #374151 !important;
+}
+
+.dark-theme .bg-gray-100 {
+  background-color: #4b5563 !important;
+}
+
+.dark-theme .bg-gray-200 {
+  background-color: #6b7280 !important;
+}
+
+.dark-theme .bg-blue-50 {
+  background-color: #1e3a8a !important;
+}
+
+.dark-theme .bg-purple-50 {
+  background-color: #581c87 !important;
+}
+
+.dark-theme .bg-yellow-50 {
+  background-color: #71a100 !important;
+}
+
+.dark-theme .bg-green-50 {
+  background-color: #166534 !important;
+}
+
+.dark-theme .text-gray-900 {
+  color: #f9fafb !important;
+}
+
+.dark-theme .text-gray-800 {
+  color: #e5e7eb !important;
+}
+
+.dark-theme .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+.dark-theme .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark-theme .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+.dark-theme .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+.dark-theme .border-gray-200 {
+  border-color: #4b5563 !important;
+}
+
+.dark-theme .border-gray-300 {
+  border-color: #6b7280 !important;
+}
+
+/* Card and container overrides for dark theme */
+.dark-theme .bg-gradient-to-br {
+  background: linear-gradient(to bottom right, #1f2937, #111827) !important;
+}
+
+.dark-theme .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark-theme .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark-theme .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Specific component overrides */
+.dark-theme .rounded-2xl,
+.dark-theme .rounded-xl,
+.dark-theme .rounded-lg {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+}
+
+/* Input and textarea styling */
+.dark-theme input,
+.dark-theme textarea,
+.dark-theme select {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+.dark-theme input::placeholder,
+.dark-theme textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Dropdown/Select options styling for dark mode */
+.dark-theme select option {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+  border: none !important;
+}
+
+.dark-theme select option:hover,
+.dark-theme select option:focus,
+.dark-theme select option:checked {
+  background-color: #4b5563 !important;
+  color: #ffffff !important;
+}
+
+/* Ensure select dropdown is visible in dark mode */
+.dark-theme select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 0.5rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 1.5em 1.5em !important;
+  padding-right: 2.5rem !important;
+}
+
+/* Button styling adjustments */
+.dark-theme button:not(.bg-gradient-to-r):not(.bg-blue-500):not(.bg-green-500):not(.bg-purple-500):not(.bg-red-500) {
+  background-color: #4b5563 !important;
+  color: #f9fafb !important;
+  border-color: #6b7280 !important;
+}
+
+.dark-theme button:hover:not(.bg-gradient-to-r) {
+  background-color: #6b7280 !important;
+}
+
+/* Footer styling for dark theme */
+.dark-theme footer {
+  background-color: #111827 !important;
+  border-top-color: #374151 !important;
+}
+
+/* Navigation and header styling */
+.dark-theme nav {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  border-color: #374151 !important;
+}
+
+/* Card-like containers */
+.dark-theme div[class*="bg-white"],
+.dark-theme div[class*="bg-gray-50"],
+.dark-theme div[class*="bg-gray-100"] {
+  background-color: #374151 !important;
+}
+
+/* Specific overrides for gradient backgrounds in dark mode */
+.dark-theme .bg-gradient-to-r {
+  background: linear-gradient(to right, #4b5563, #6b7280) !important;
+}
+
+.dark-theme .bg-gradient-to-l {
+  background: linear-gradient(to left, #4b5563, #6b7280) !important;
+}
+
+.dark-theme .bg-gradient-to-t {
+  background: linear-gradient(to top, #4b5563, #6b7280) !important;
+}
+
+.dark-theme .bg-gradient-to-b {
+  background: linear-gradient(to bottom, #4b5563, #6b7280) !important;
+}
+
+/* Override for blue/purple gradients to keep them visible but darker */
+.dark-theme .bg-gradient-to-r.from-blue-600,
+.dark-theme .bg-gradient-to-r.from-purple-500 {
+  background: linear-gradient(to right, #1e40af, #7c3aed) !important;
+}
+
+/* Hover states */
+.dark-theme .hover\:bg-gray-50:hover {
+  background-color: #4b5563 !important;
+}
+
+.dark-theme .hover\:bg-gray-100:hover {
+  background-color: #6b7280 !important;
+}
+
+/* Focus states */
+.dark-theme .focus\:ring-blue-500:focus {
+  --tw-ring-color: #3b82f6 !important;
+}
+
+.dark-theme .focus\:border-blue-500:focus {
+  border-color: #3b82f6 !important;
+}
+
+/* Special styling for gradient text in dark mode */
+.dark-theme .bg-gradient-to-r.from-blue-600.to-purple-600.bg-clip-text.text-transparent {
+  background: linear-gradient(to right, #60a5fa, #a78bfa) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+/* Alternative approach - make it solid color in dark mode */
+.dark-theme h2.bg-gradient-to-r.from-blue-600.to-purple-600.bg-clip-text.text-transparent {
+  background: none !important;
+  color: #e5e7eb !important;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.5) !important;
+}
+
+/* Or add a subtle glow effect */
+.dark-theme h1.bg-gradient-to-r.from-blue-600.to-purple-600.bg-clip-text.text-transparent,
+.dark-theme h2.bg-gradient-to-r.from-blue-600.to-purple-600.bg-clip-text.text-transparent {
+  background: linear-gradient(to right, #93c5fd, #c4b5fd) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.3)) !important;
+}
+
+/* Green element overrides for dark theme - make light green */
+.dark-theme .from-green-500 {
+  background: linear-gradient(to right, #10b981, #06b6d4) !important;
+}
+
+.dark-theme .from-green-600 {
+  background: linear-gradient(to right, #059669, #0891b2) !important;
+}
+
+.dark-theme .from-green-100 {
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2)) !important;
+}
+
+.dark-theme .to-blue-100 {
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2)) !important;
+}
+
+.dark-theme .border-green-300 {
+  border-color: #10b981 !important;
+}
+
+.dark-theme .text-green-800 {
+  color: #34d399 !important;
+}
+
+.dark-theme .text-green-700 {
+  color: #6ee7b7 !important;
+}
+
+.dark-theme .from-green-400 {
+  background: linear-gradient(to right, #34d399, #22d3ee) !important;
+}
+
+.dark-theme .bg-green-100 {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.dark-theme .text-green-800 {
+  color: #6ee7b7 !important;
+}
+
+.dark-theme .border-green-300 {
+  border-color: #10b981 !important;
+}
+
+/* Purple element overrides for dark theme - make light purple */
+.dark-theme .text-purple-800 {
+  color: #c4b5fd !important;
+}
+
+.dark-theme .text-purple-700 {
+  color: #ddd6fe !important;
+}
+
+.dark-theme .text-purple-600 {
+  color: #e9d5ff !important;
+}
+
+.dark-theme .from-purple-100 {
+  background: linear-gradient(to right, rgba(196, 181, 253, 0.2), rgba(251, 207, 232, 0.2)) !important;
+}
+
+.dark-theme .to-pink-100 {
+  background: linear-gradient(to right, rgba(196, 181, 253, 0.2), rgba(251, 207, 232, 0.2)) !important;
+}
+
+.dark-theme .border-purple-200 {
+  border-color: #a78bfa !important;
+}
+
+.dark-theme .accent-purple-500 {
+  accent-color: #a78bfa !important;
 }
