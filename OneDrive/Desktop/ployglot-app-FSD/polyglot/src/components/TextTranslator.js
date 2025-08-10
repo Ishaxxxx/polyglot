@@ -205,6 +205,10 @@ const TextTranslator = () => {
             const newFavorites = [favorite, ...favorites.slice(0, 9)];
             setFavorites(newFavorites);
             localStorage.setItem('translation-favorites', JSON.stringify(newFavorites));
+
+            // Dispatch event to update stats
+            window.dispatchEvent(new CustomEvent('translation-stats-update'));
+
             playSound('success');
         }
     };
@@ -223,6 +227,9 @@ const TextTranslator = () => {
         const newHistory = [historyItem, ...translationHistory.slice(0, 19)];
         setTranslationHistory(newHistory);
         localStorage.setItem('translation-history', JSON.stringify(newHistory));
+
+        // Dispatch event to update stats
+        window.dispatchEvent(new CustomEvent('translation-stats-update'));
     };
 
     // 🚀 Enhanced Translation Function

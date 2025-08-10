@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import geminiService from '../services/geminiService';
+import { translateText } from '../services/translationService';
 
 const AudioAssistant = () => {
     const [isListening, setIsListening] = useState(false);
@@ -6,6 +8,9 @@ const AudioAssistant = () => {
     const [messages, setMessages] = useState([]);
     const [isTyping, setIsTyping] = useState(false);
     const [conversationContext, setConversationContext] = useState([]);
+    const [geminiEnabled, setGeminiEnabled] = useState(false);
+    const [textInput, setTextInput] = useState('');
+    const [isTranslating, setIsTranslating] = useState(false);
     const recognitionRef = useRef(null);
 
     // Enhanced command patterns with natural language understanding
@@ -82,6 +87,22 @@ const AudioAssistant = () => {
             ]
         }
     });
+
+    // Check Gemini availability on component mount
+    useEffect(() => {
+        const checkGemini = async () => {
+            const available = geminiService.isAvailable();
+            setGeminiEnabled(available);
+
+            if (available) {
+                console.log('🤖 Gemini AI is ready for enhanced responses!');
+            } else {
+                console.log('⚠️ Gemini AI not available, using fallback responses');
+            }
+        };
+
+        checkGemini();
+    }, []);
 
     const speak = useCallback((text, rate = 1, pitch = 1) => {
         if ('speechSynthesis' in window) {
@@ -227,47 +248,84 @@ const AudioAssistant = () => {
         return response;
     }, [commandPatterns]);
 
-    const handleVoiceCommand = useCallback((command) => {
+    const handleVoiceCommand = useCallback(async (command) => {
         setIsTyping(true);
 
         // Add to conversation context
         setConversationContext(prev => [...prev.slice(-4), { user: command, timestamp: Date.now() }]);
 
-        // Analyze the command using NLP
-        const analysis = analyzeCommand(command);
-        const response = generateResponse(analysis, command);
+        let response;
+        let confidence = 0.8; // Default confidence for Gemini responses
+        let intent = 'ai_assistant';
+
+        try {
+            // Try Gemini AI first if available
+            if (geminiEnabled) {
+                console.log('🤖 Using Gemini AI for command:', command);
+                try {
+                    // Get current app context for more intelligent responses
+                    const appState = {
+                        currentPage: 'translation',
+                        theme: 'auto-detect', // Could be enhanced to get actual theme
+                        recentTranslations: [], // Could be enhanced to get from history
+                        userActivity: { lastAction: 'voice_command' }
+                    };
+
+                    const geminiResponse = await geminiService.handleContextualQuestion(
+                        command,
+                        appState
+                    );
+
+                    response = {
+                        text: geminiResponse.text,
+                        action: null // Gemini responses are conversational, actions handled separately
+                    };
+
+                    // Still check for specific actions in the command
+                    const actionResult = checkForSpecificActions(command);
+                    if (actionResult.action) {
+                        response.action = actionResult.action;
+                    }
+
+                    confidence = 0.95; // High confidence for Gemini responses
+                    intent = 'gemini_ai';
+                    console.log('✅ Gemini response:', response.text);
+                } catch (error) {
+                    console.error('Gemini AI error, falling back to pattern matching:', error);
+                    // Fall back to original pattern matching
+                    const analysis = analyzeCommand(command);
+                    response = generateResponse(analysis, command);
+                    confidence = analysis.confidence;
+                    intent = analysis.intent;
+                }
+            } else {
+                // Use original pattern matching system
+                const analysis = analyzeCommand(command);
+                response = generateResponse(analysis, command);
+                confidence = analysis.confidence;
+                intent = analysis.intent;
+            }
+        } catch (error) {
+            console.error('Error processing command:', error);
+            response = {
+                text: "I'm having trouble processing that request right now. Please try again or say 'help' for assistance.",
+                action: null
+            };
+        }
 
         const newMessage = {
             id: Date.now(),
             user: command,
             assistant: response.text,
             timestamp: new Date().toLocaleTimeString(),
-            confidence: analysis.confidence,
-            intent: analysis.intent
+            confidence: confidence,
+            intent: intent,
+            aiPowered: geminiEnabled && intent === 'gemini_ai'
         };
 
         // Execute action if any
         if (response.action) {
-            switch (response.action.type) {
-                case 'clear':
-                    window.dispatchEvent(new CustomEvent('assistant-clear'));
-                    break;
-                case 'theme':
-                    window.dispatchEvent(new CustomEvent('assistant-theme', { detail: response.action.value }));
-                    break;
-                case 'history':
-                    window.dispatchEvent(new CustomEvent('assistant-history'));
-                    break;
-                case 'favorites':
-                    window.dispatchEvent(new CustomEvent('assistant-favorites'));
-                    break;
-                case 'speak':
-                    window.dispatchEvent(new CustomEvent('assistant-speak'));
-                    break;
-                case 'setTargetLanguage':
-                    window.dispatchEvent(new CustomEvent('assistant-setLanguage', { detail: response.action.value }));
-                    break;
-            }
+            executeAction(response.action);
         }
 
         setTimeout(() => {
@@ -275,9 +333,66 @@ const AudioAssistant = () => {
             setIsTyping(false);
             speak(response.text);
         }, 500);
-    }, [analyzeCommand, generateResponse, speak]);
+    }, [analyzeCommand, generateResponse, speak, geminiEnabled, conversationContext]);
 
-    useEffect(() => {
+    // Helper function to check for specific actions that need immediate execution
+    const checkForSpecificActions = useCallback((command) => {
+        const lowerCommand = command.toLowerCase();
+
+        if (lowerCommand.includes('clear')) {
+            return { action: { type: 'clear' } };
+        } else if (lowerCommand.includes('dark mode')) {
+            return { action: { type: 'theme', value: 'dark' } };
+        } else if (lowerCommand.includes('light mode')) {
+            return { action: { type: 'theme', value: 'light' } };
+        } else if (lowerCommand.includes('history')) {
+            return { action: { type: 'history' } };
+        } else if (lowerCommand.includes('favorites')) {
+            return { action: { type: 'favorites' } };
+        } else if (lowerCommand.includes('speak')) {
+            return { action: { type: 'speak' } };
+        }
+
+        // Check for language setting
+        const languages = {
+            'spanish': 'es', 'french': 'fr', 'chinese': 'zh-Hans',
+            'korean': 'ko', 'hindi': 'hi', 'english': 'en'
+        };
+
+        for (const [lang, code] of Object.entries(languages)) {
+            if (lowerCommand.includes(lang)) {
+                return { action: { type: 'setTargetLanguage', value: code } };
+            }
+        }
+
+        return { action: null };
+    }, []);
+
+    // Execute actions
+    const executeAction = useCallback((action) => {
+        switch (action.type) {
+            case 'clear':
+                window.dispatchEvent(new CustomEvent('assistant-clear'));
+                break;
+            case 'theme':
+                window.dispatchEvent(new CustomEvent('assistant-theme', { detail: action.value }));
+                break;
+            case 'history':
+                window.dispatchEvent(new CustomEvent('assistant-history'));
+                break;
+            case 'favorites':
+                window.dispatchEvent(new CustomEvent('assistant-favorites'));
+                break;
+            case 'speak':
+                window.dispatchEvent(new CustomEvent('assistant-speak'));
+                break;
+            case 'setTargetLanguage':
+                window.dispatchEvent(new CustomEvent('assistant-setLanguage', { detail: action.value }));
+                break;
+            default:
+                break;
+        }
+    }, []); useEffect(() => {
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognitionRef.current = new SpeechRecognition();
@@ -358,9 +473,9 @@ const AudioAssistant = () => {
         setIsActive(!isActive);
         if (!isActive) {
             const greetings = [
-                "Hello! I'm your AI translation assistant. I understand natural language - just speak to me normally!",
-                "Hi there! I'm here to help with translations. Try saying something like 'translate this to Spanish'!",
-                "Welcome! I can help you translate, manage favorites, change themes, and much more. Just talk to me naturally!"
+                "Hi there! I'm your AI chatbot.",
+                "Hello! I'm here to help you.",
+                "Hi! I'm your translation assistant."
             ];
             const greeting = greetings[Math.floor(Math.random() * greetings.length)];
             speak(greeting);
@@ -369,40 +484,165 @@ const AudioAssistant = () => {
 
     // Smart command suggestions based on context
     const getSmartSuggestions = () => {
-        const baseCommands = ['translate to Spanish', 'show history', 'dark mode', 'help'];
+        const baseCommands = [
+            'How do I use voice features?',
+            'Tell me about dark mode',
+            'What languages do you support?',
+            'How can I save favorites?'
+        ];
 
         // Add contextual suggestions based on conversation
         if (conversationContext.length > 0) {
             const lastCommand = conversationContext[conversationContext.length - 1];
             if (lastCommand.user.includes('translate')) {
-                baseCommands.unshift('speak translation');
+                baseCommands.unshift('How to improve pronunciation?');
+            } else if (lastCommand.user.includes('language')) {
+                baseCommands.unshift('Show translation tips');
             }
         }
 
         return baseCommands.slice(0, 4);
     };
 
+    // Language mapping for translation
+    const languageMap = {
+        'spanish': 'es', 'spain': 'es', 'español': 'es',
+        'french': 'fr', 'france': 'fr', 'français': 'fr',
+        'english': 'en', 'inglés': 'en',
+        'chinese': 'zh-Hans', 'mandarin': 'zh-Hans', '中文': 'zh-Hans',
+        'korean': 'ko', '한국어': 'ko',
+        'hindi': 'hi', 'हिंदी': 'hi'
+    };
+
+    // Extract translation request from text
+    const parseTranslationRequest = (text) => {
+        const lowerText = text.toLowerCase();
+
+        // Pattern 1: "translate [text] to [language]"
+        const pattern1 = /translate\s+(.+?)\s+(?:to|into|in)\s+(\w+)/i;
+        const match1 = text.match(pattern1);
+
+        if (match1) {
+            const textToTranslate = match1[1].trim();
+            const targetLang = languageMap[match1[2].toLowerCase()] || 'es';
+            return { text: textToTranslate, targetLang, sourceLang: 'auto' };
+        }
+
+        // Pattern 2: "how do you say [text] in [language]"
+        const pattern2 = /how\s+do\s+you\s+say\s+(.+?)\s+in\s+(\w+)/i;
+        const match2 = text.match(pattern2);
+
+        if (match2) {
+            const textToTranslate = match2[1].trim();
+            const targetLang = languageMap[match2[2].toLowerCase()] || 'es';
+            return { text: textToTranslate, targetLang, sourceLang: 'auto' };
+        }
+
+        // Pattern 3: "what is [text] in [language]"
+        const pattern3 = /what\s+is\s+(.+?)\s+in\s+(\w+)/i;
+        const match3 = text.match(pattern3);
+
+        if (match3) {
+            const textToTranslate = match3[1].trim();
+            const targetLang = languageMap[match3[2].toLowerCase()] || 'es';
+            return { text: textToTranslate, targetLang, sourceLang: 'auto' };
+        }
+
+        return null;
+    };
+
+    // Handle direct translation
+    const handleDirectTranslation = async (translationRequest) => {
+        setIsTranslating(true);
+        try {
+            const result = await translateText(
+                translationRequest.text,
+                translationRequest.sourceLang,
+                translationRequest.targetLang
+            );
+
+            const langNames = {
+                'es': 'Spanish', 'fr': 'French', 'en': 'English',
+                'zh-Hans': 'Chinese', 'ko': 'Korean', 'hi': 'Hindi'
+            };
+
+            const targetLangName = langNames[translationRequest.targetLang] || translationRequest.targetLang;
+
+            return `"${translationRequest.text}" in ${targetLangName} is: "${result.translatedText}"`;
+        } catch (error) {
+            console.error('Translation error:', error);
+            return `Sorry, I couldn't translate that text right now. Please try again later.`;
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
+    // Send text message
+    const sendTextMessage = async () => {
+        if (!textInput.trim()) return;
+
+        const message = textInput.trim();
+        setTextInput('');
+
+        // Check if it's a translation request
+        const translationRequest = parseTranslationRequest(message);
+
+        if (translationRequest) {
+            setIsTyping(true);
+            const translationResult = await handleDirectTranslation(translationRequest);
+
+            const newMessage = {
+                id: Date.now(),
+                user: message,
+                assistant: translationResult,
+                timestamp: new Date().toLocaleTimeString(),
+                confidence: 1.0,
+                intent: 'direct_translation',
+                aiPowered: false
+            };
+
+            setMessages(prev => [newMessage, ...prev.slice(0, 4)]);
+            setIsTyping(false);
+            speak(translationResult);
+        } else {
+            // Handle as regular voice command
+            handleVoiceCommand(message);
+        }
+    };
+
     return (
-        <div className="fixed bottom-20 right-8 z-50">
+        <div className="fixed bottom-4 right-4 z-[9999]">
             {/* Enhanced Assistant Panel */}
             {isActive && (
-                <div className="mb-4 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-[500px] overflow-hidden">
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4">
+                <div className="mb-4 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 h-[500px] flex flex-col overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 flex-shrink-0">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="font-bold text-lg">🤖 AI Assistant</h3>
-                                <p className="text-sm opacity-90">Natural language translation helper</p>
+                                <h3 className="font-bold text-base flex items-center">
+                                    🤖 AI Assistant
+                                    {geminiEnabled && (
+                                        <span className="ml-2 px-2 py-1 bg-yellow-400 text-black text-xs rounded-full font-medium">
+                                            Gemini Powered
+                                        </span>
+                                    )}
+                                </h3>
+                                <p className="text-xs opacity-90">
+                                    {geminiEnabled
+                                        ? "Advanced AI with natural conversation"
+                                        : "Natural language translation helper"
+                                    }
+                                </p>
                             </div>
                             <div className="text-right text-xs opacity-75">
                                 {conversationContext.length > 0 && (
-                                    <div>Context: {conversationContext.length} interactions</div>
+                                    <div>Context: {conversationContext.length}</div>
                                 )}
                             </div>
                         </div>
                     </div>
 
                     {/* Smart Suggestions */}
-                    <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
+                    <div className="p-2 bg-gradient-to-r from-blue-50 to-purple-50 border-b flex-shrink-0">
                         <div className="text-xs text-gray-600 mb-2 font-medium">💡 Try saying naturally:</div>
                         <div className="grid grid-cols-2 gap-1">
                             {getSmartSuggestions().map((cmd, index) => (
@@ -417,8 +657,8 @@ const AudioAssistant = () => {
                         </div>
                     </div>
 
-                    {/* Enhanced Messages with Typing Indicator */}
-                    <div className="max-h-60 overflow-y-auto p-3 space-y-3">
+                    {/* Enhanced Messages with Typing Indicator - Flexible Height */}
+                    <div className="flex-1 overflow-y-auto p-2 space-y-2 min-h-0">
                         {messages.length === 0 ? (
                             <div className="text-center text-gray-500 text-sm py-4">
                                 <div className="mb-2">🎯 I understand natural language!</div>
@@ -426,9 +666,9 @@ const AudioAssistant = () => {
                             </div>
                         ) : (
                             messages.map((msg) => (
-                                <div key={msg.id} className="space-y-2">
+                                <div key={msg.id} className="space-y-1">
                                     <div className="text-right">
-                                        <div className="inline-block bg-blue-500 text-white p-3 rounded-lg text-sm max-w-xs shadow-md">
+                                        <div className="inline-block bg-blue-500 text-white p-2 rounded-lg text-xs max-w-xs shadow-md">
                                             {msg.user}
                                         </div>
                                         <div className="text-xs text-gray-500 mt-1 flex items-center justify-end">
@@ -441,8 +681,16 @@ const AudioAssistant = () => {
                                         </div>
                                     </div>
                                     <div className="text-left">
-                                        <div className="inline-block bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 p-3 rounded-lg text-sm max-w-xs shadow-md">
+                                        <div className={`inline-block p-2 rounded-lg text-xs max-w-xs shadow-md ${msg.aiPowered
+                                            ? 'bg-gradient-to-r from-yellow-100 to-orange-100 text-gray-800 border border-yellow-300'
+                                            : 'bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800'
+                                            }`}>
                                             {msg.assistant}
+                                            {msg.aiPowered && (
+                                                <div className="text-xs text-orange-600 mt-1 flex items-center">
+                                                    ✨ Gemini AI
+                                                </div>
+                                            )}
                                         </div>
                                         {msg.intent && (
                                             <div className="text-xs text-purple-600 mt-1">
@@ -456,7 +704,7 @@ const AudioAssistant = () => {
 
                         {isTyping && (
                             <div className="text-left">
-                                <div className="inline-block bg-gray-100 text-gray-600 p-3 rounded-lg text-sm">
+                                <div className="inline-block bg-gray-100 text-gray-600 p-2 rounded-lg text-xs">
                                     <div className="flex items-center space-x-1">
                                         <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
                                         <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -468,26 +716,55 @@ const AudioAssistant = () => {
                         )}
                     </div>
 
-                    {/* Enhanced Voice Input */}
-                    <div className="p-3 border-t bg-gradient-to-r from-gray-50 to-purple-50">
+                    {/* Text Input Box */}
+                    <div className="p-3 border-t border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800">
+                        <div className="flex space-x-2">
+                            <input
+                                type="text"
+                                value={textInput}
+                                onChange={(e) => setTextInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && sendTextMessage()}
+                                placeholder="Type: 'Translate hello to Spanish'"
+                                className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg 
+                                         bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
+                                         placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 
+                                         focus:ring-purple-500 disabled:opacity-50"
+                                disabled={isTranslating}
+                            />
+                            <button
+                                onClick={sendTextMessage}
+                                disabled={!textInput.trim() || isTranslating}
+                                className="px-4 py-2 text-sm bg-purple-500 hover:bg-purple-600 disabled:bg-gray-400 
+                                         text-white rounded-lg transition-colors duration-200 min-w-[60px]"
+                            >
+                                {isTranslating ? '🔄' : 'Send'}
+                            </button>
+                        </div>
+                        <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            ✨ Try direct translations or voice commands
+                        </div>
+                    </div>
+
+                    {/* Enhanced Voice Input - Pinned to Bottom */}
+                    <div className="p-2 border-t bg-gradient-to-r from-gray-50 to-purple-50 flex-shrink-0">
                         <button
                             onClick={startListening}
                             disabled={isListening}
-                            className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center space-x-2 ${isListening
+                            className={`w-full py-2 px-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center space-x-2 text-sm ${isListening
                                 ? 'bg-red-500 text-white animate-pulse shadow-lg'
                                 : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-md hover:shadow-lg transform hover:scale-105'
                                 }`}
                         >
-                            <span className="text-lg">
+                            <span className="text-base">
                                 {isListening ? '🎤' : '🗣️'}
                             </span>
                             <span>
-                                {isListening ? 'Listening... Speak naturally!' : 'Click & Speak Naturally'}
+                                {isListening ? 'Listening...' : 'Click & Speak Naturally'}
                             </span>
                         </button>
 
                         {/* Quick Actions */}
-                        <div className="flex justify-center mt-2 space-x-2">
+                        <div className="flex justify-center mt-1 space-x-2">
                             <button
                                 onClick={() => handleVoiceCommand('help')}
                                 className="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"

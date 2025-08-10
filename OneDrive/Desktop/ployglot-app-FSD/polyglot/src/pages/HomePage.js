@@ -5,32 +5,79 @@ const HomePage = () => {
     const { t } = useLocalization();
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isVisible, setIsVisible] = useState(false);
+    const [statsUpdated, setStatsUpdated] = useState(false);
     const [stats, setStats] = useState({
         totalTranslations: 0,
         favoriteCount: 0,
         languagesSupported: 6
     });
 
-    // Update time every second
+    // Update time every second and listen for stats changes
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(new Date());
         }, 1000);
 
-        // Load stats from localStorage
-        const favorites = localStorage.getItem('translation-favorites');
-        const history = localStorage.getItem('translation-history');
+        // Function to update stats from localStorage
+        const updateStats = () => {
+            const favorites = localStorage.getItem('translation-favorites');
+            const history = localStorage.getItem('translation-history');
 
-        setStats({
-            totalTranslations: history ? JSON.parse(history).length : 0,
-            favoriteCount: favorites ? JSON.parse(favorites).length : 0,
-            languagesSupported: 6
-        });
+            const newStats = {
+                totalTranslations: history ? JSON.parse(history).length : 0,
+                favoriteCount: favorites ? JSON.parse(favorites).length : 0,
+                languagesSupported: 6
+            };
+
+            setStats(newStats);
+            setStatsUpdated(true);
+
+            // Reset animation trigger after a short delay
+            setTimeout(() => setStatsUpdated(false), 1000);
+        };
+
+        // Load stats initially
+        updateStats();
+
+        // Listen for storage changes (when other tabs update localStorage)
+        const handleStorageChange = (e) => {
+            if (e.key === 'translation-favorites' || e.key === 'translation-history') {
+                updateStats();
+            }
+        };
+
+        // Listen for custom events from the translation component
+        const handleStatsUpdate = () => {
+            updateStats();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('translation-stats-update', handleStatsUpdate);
 
         // Trigger animation
         setIsVisible(true);
 
-        return () => clearInterval(timer);
+        return () => {
+            clearInterval(timer);
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('translation-stats-update', handleStatsUpdate);
+        };
+    }, []);
+
+    // Also update stats when component becomes visible (for real-time updates)
+    useEffect(() => {
+        const updateStatsInterval = setInterval(() => {
+            const favorites = localStorage.getItem('translation-favorites');
+            const history = localStorage.getItem('translation-history');
+
+            setStats({
+                totalTranslations: history ? JSON.parse(history).length : 0,
+                favoriteCount: favorites ? JSON.parse(favorites).length : 0,
+                languagesSupported: 6
+            });
+        }, 2000); // Update every 2 seconds
+
+        return () => clearInterval(updateStatsInterval);
     }, []);
 
     const features = [
@@ -93,17 +140,38 @@ const HomePage = () => {
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300">
-                            <div className="text-3xl font-bold">{stats.totalTranslations}</div>
-                            <div className="text-blue-100">Total Translations</div>
+                        <div className={`bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 hover:shadow-2xl ${statsUpdated ? 'animate-bounce' : ''}`}>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className={`text-3xl font-bold ${statsUpdated ? 'animate-pulse text-yellow-300' : ''}`}>
+                                        {stats.totalTranslations}
+                                    </div>
+                                    <div className="text-blue-100">Total Translations</div>
+                                </div>
+                                <div className="text-4xl opacity-20">📊</div>
+                            </div>
                         </div>
-                        <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300">
-                            <div className="text-3xl font-bold">{stats.favoriteCount}</div>
-                            <div className="text-purple-100">Saved Favorites</div>
+                        <div className={`bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 hover:shadow-2xl ${statsUpdated ? 'animate-bounce' : ''}`}>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className={`text-3xl font-bold ${statsUpdated ? 'animate-pulse text-yellow-300' : ''}`}>
+                                        {stats.favoriteCount}
+                                    </div>
+                                    <div className="text-purple-100">Saved Favorites</div>
+                                </div>
+                                <div className="text-4xl opacity-20">⭐</div>
+                            </div>
                         </div>
-                        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300">
-                            <div className="text-3xl font-bold">{stats.languagesSupported}</div>
-                            <div className="text-green-100">Languages Supported</div>
+                        <div className={`bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 hover:shadow-2xl ${statsUpdated ? 'animate-bounce' : ''}`}>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className="text-3xl font-bold">
+                                        {stats.languagesSupported}
+                                    </div>
+                                    <div className="text-green-100">Languages Supported</div>
+                                </div>
+                                <div className="text-4xl opacity-20">🌍</div>
+                            </div>
                         </div>
                     </div>
 
